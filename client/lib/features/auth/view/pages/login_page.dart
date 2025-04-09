@@ -6,7 +6,7 @@ import 'package:flutter_spotify_clone/core/widgets/loader.dart';
 import 'package:flutter_spotify_clone/features/auth/repositories/auth_remote_repository.dart';
 import 'package:flutter_spotify_clone/features/auth/view/pages/signup_page.dart';
 import 'package:flutter_spotify_clone/features/auth/view/widgets/auth/auth_custom_button.dart';
-import 'package:flutter_spotify_clone/features/auth/view/widgets/custom_field.dart';
+import 'package:flutter_spotify_clone/core/widgets/custom_field.dart';
 import 'package:flutter_spotify_clone/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:flutter_spotify_clone/features/home/view/pages/home_page.dart';
 import 'package:fpdart/fpdart.dart';
