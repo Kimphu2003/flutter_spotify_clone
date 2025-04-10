@@ -1,14 +1,15 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spotify_clone/core/constants/server_constant.dart';
 import 'package:flutter_spotify_clone/core/failure/failure.dart';
+import 'package:flutter_spotify_clone/features/home/models/song_model.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 part 'HomeRepository.g.dart';
-
 
 @riverpod
 HomeRepository homeRepository(Ref ref) {
@@ -17,12 +18,12 @@ HomeRepository homeRepository(Ref ref) {
 
 class HomeRepository {
   Future<Either<AppFailure, String>> uploadSong(
-      File selectedAudio,
-      File selectedThumbnail,
-      String songName,
-      String artist,
-      String hexCode,
-      String token,
+    File selectedAudio,
+    File selectedThumbnail,
+    String songName,
+    String artist,
+    String hexCode,
+    String token,
   ) async {
     try {
       final response = http.MultipartRequest(
@@ -32,16 +33,17 @@ class HomeRepository {
       response
         ..files.addAll([
           await http.MultipartFile.fromPath('song', selectedAudio.path),
-          await http.MultipartFile.fromPath('thumbnail', selectedThumbnail.path),
+          await http.MultipartFile.fromPath(
+            'thumbnail',
+            selectedThumbnail.path,
+          ),
         ])
         ..fields.addAll({
           'artist': artist,
           'song_name': songName,
           'hex_code': hexCode,
         })
-        ..headers.addAll({
-          'x-auth-token': token
-        });
+        ..headers.addAll({'x-auth-token': token});
 
       final res = await response.send();
 
@@ -50,7 +52,33 @@ class HomeRepository {
       }
 
       return Right(await res.stream.bytesToString());
+    } catch (e) {
+      return Left(AppFailure(e.toString()));
+    }
+  }
 
+  Future<Either<AppFailure, List<Song>>> getAllSongs(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${ServerConstant.serverURL}/song/list'),
+        headers: {'Content-Type': 'application/json', 'x-auth-token': token},
+      );
+
+      var resBodyMap = jsonDecode(response.body);
+
+      if(response.statusCode != 200) {
+        resBodyMap = resBodyMap as Map<String ,dynamic>;
+        return Left(AppFailure(resBodyMap['detail']));
+      }
+
+      resBodyMap = resBodyMap as List;
+
+      List<Song> songs = [];
+
+      for(final map in resBodyMap) {
+        songs.add(Song.fromMap(map));
+      }
+      return Right(songs);
     } catch (e) {
       return Left(AppFailure(e.toString()));
     }
