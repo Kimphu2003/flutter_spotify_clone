@@ -5,12 +5,19 @@ import 'package:flutter_spotify_clone/core/theme/theme.dart';
 import 'package:flutter_spotify_clone/features/auth/view/pages/login_page.dart';
 import 'package:flutter_spotify_clone/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:flutter_spotify_clone/features/home/view/pages/home_page.dart';
+import 'package:hive/hive.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final dir = await getApplicationDocumentsDirectory();
+  Hive.defaultDirectory = dir.path;
+
   final container = ProviderContainer();
   await container.read(authViewModelProvider.notifier).initSharedPreference();
   await container.read(authViewModelProvider.notifier).getData();
+
   runApp(UncontrolledProviderScope(container: container, child: const MyApp()));
 }
 

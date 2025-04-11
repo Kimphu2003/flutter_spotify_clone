@@ -1,4 +1,5 @@
 import 'package:flutter_spotify_clone/features/home/models/song_model.dart';
+import 'package:flutter_spotify_clone/features/home/repositories/home_local_repository.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:just_audio/just_audio.dart';
 
@@ -8,19 +9,22 @@ part 'current_song_notifier.g.dart';
 class CurrentSongNotifier extends _$CurrentSongNotifier {
   AudioPlayer? audioPlayer;
   bool isPlaying = false;
+  late HomeLocalRepository _homeLocalRepository;
 
   Song? build() {
+    _homeLocalRepository = HomeLocalRepository();
     return null;
   }
 
   void updateSong(Song song) async {
+    await audioPlayer?.stop();
     audioPlayer = AudioPlayer();
 
     final audioSource = AudioSource.uri(Uri.parse(song.song_url));
     await audioPlayer!.setAudioSource(audioSource);
 
     audioPlayer!.playerStateStream.listen((state) {
-      if(state.processingState == ProcessingState.completed) {
+      if (state.processingState == ProcessingState.completed) {
         audioPlayer!.seek(Duration.zero);
         audioPlayer!.pause();
         isPlaying = false;
@@ -28,6 +32,7 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
         this.state = this.state?.copyWith(hex_code: this.state?.hex_code);
       }
     });
+    _homeLocalRepository.uploadLocalSong(song);
 
     audioPlayer!.play();
     isPlaying = true;
@@ -35,12 +40,20 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
   }
 
   void playPause() {
-    if(isPlaying) {
+    if (isPlaying) {
       audioPlayer?.pause();
     } else {
       audioPlayer?.play();
     }
     isPlaying = !isPlaying;
     state = state?.copyWith(hex_code: state?.hex_code);
+  }
+
+  void seek(double value) {
+    audioPlayer!.seek(
+      Duration(
+        milliseconds: (value * audioPlayer!.duration!.inMilliseconds).toInt(),
+      ),
+    );
   }
 }
