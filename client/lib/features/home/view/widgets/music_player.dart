@@ -94,7 +94,8 @@ class MusicPlayer extends ConsumerWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                recentlySongPlayed[indexOfRecentlySongPlayed].song_name,
+                                recentlySongPlayed[indexOfRecentlySongPlayed]
+                                    .song_name,
                                 style: const TextStyle(
                                   color: Palette.whiteColor,
                                   fontSize: 24,
@@ -102,7 +103,8 @@ class MusicPlayer extends ConsumerWidget {
                                 ),
                               ),
                               Text(
-                                recentlySongPlayed[indexOfRecentlySongPlayed].artist,
+                                recentlySongPlayed[indexOfRecentlySongPlayed]
+                                    .artist,
                                 style: const TextStyle(
                                   color: Palette.subtitleText,
                                   fontSize: 16,
@@ -117,13 +119,18 @@ class MusicPlayer extends ConsumerWidget {
                             onPressed: () async {
                               await ref
                                   .read(homeViewModelProvider.notifier)
-                                  .favSongs(recentlySongPlayed[indexOfRecentlySongPlayed].id);
+                                  .favSongs(
+                                    recentlySongPlayed[indexOfRecentlySongPlayed]
+                                        .id,
+                                  );
                             },
                             icon:
                                 userFavorites
                                         .where(
                                           (fav) =>
-                                              fav.song_id == recentlySongPlayed[indexOfRecentlySongPlayed].id,
+                                              fav.song_id ==
+                                              recentlySongPlayed[indexOfRecentlySongPlayed]
+                                                  .id,
                                         )
                                         .toList()
                                         .isNotEmpty
@@ -174,7 +181,7 @@ class MusicPlayer extends ConsumerWidget {
                               Row(
                                 children: [
                                   Text(
-                                    '${position?.inMinutes}:${(position?.inSeconds ?? 0) > 9 ? '${position?.inSeconds}' : '0${position?.inSeconds}'}',
+                                    '${position?.inMinutes}:${((position?.inSeconds ?? 0) % 60).toString().padLeft(2, '0')}',
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w400,
@@ -183,7 +190,7 @@ class MusicPlayer extends ConsumerWidget {
                                   ),
                                   Expanded(child: SizedBox()),
                                   Text(
-                                    '${duration?.inMinutes}:${(duration?.inSeconds ?? 0) > 9 ? '${duration?.inSeconds}' : '0${duration?.inSeconds}'}',
+                                    '${duration?.inMinutes}:${((duration?.inSeconds ?? 0) % 60).toString().padLeft(2, '0')}',
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontWeight: FontWeight.w400,
@@ -212,12 +219,23 @@ class MusicPlayer extends ConsumerWidget {
                             padding: const EdgeInsets.all(10),
                             child: IconButton(
                               onPressed: () {
-                                indexOfRecentlySongPlayed = recentlySongPlayed.length - 2;
-                                indexOfRecentlySongPlayed > 0 ? indexOfRecentlySongPlayed : 0;
-
-                                songNotifier.playPause();
-                                songNotifier.updateSong(recentlySongPlayed[indexOfRecentlySongPlayed]);
+                                int newIndex = indexOfRecentlySongPlayed - 1;
+                                if (newIndex < 0) {
+                                  newIndex = 0;
+                                }
+                                songNotifier.updateSong(
+                                  recentlySongPlayed[newIndex],
+                                );
                               },
+                              //   indexOfRecentlySongPlayed =
+                              //       recentlySongPlayed.length - 2;
+                              //   indexOfRecentlySongPlayed > 0
+                              //       ? indexOfRecentlySongPlayed
+                              //       : 0;
+                              //   songNotifier.playPause();
+                              //   songNotifier.updateSong(
+                              //     recentlySongPlayed[indexOfRecentlySongPlayed],
+                              //   );
                               icon: Image.asset(
                                 'assets/images/previous-song.png',
                                 color: Palette.whiteColor,
@@ -242,11 +260,24 @@ class MusicPlayer extends ConsumerWidget {
                             padding: const EdgeInsets.all(10),
                             child: IconButton(
                               onPressed: () {
-                                indexOfRecentlySongPlayed = recentlySongPlayed.length + 2;
-                                indexOfRecentlySongPlayed > recentlySongPlayed.length ? 0 : indexOfRecentlySongPlayed;
-
-                                songNotifier.playPause();
-                                songNotifier.updateSong(recentlySongPlayed[indexOfRecentlySongPlayed]);
+                                int newIndex = indexOfRecentlySongPlayed + 1;
+                                if (newIndex >= recentlySongPlayed.length) {
+                                  newIndex = 0;
+                                }
+                                songNotifier.updateSong(
+                                  recentlySongPlayed[newIndex],
+                                );
+                                // indexOfRecentlySongPlayed =
+                                //     recentlySongPlayed.length + 2;
+                                // indexOfRecentlySongPlayed >
+                                //         recentlySongPlayed.length
+                                //     ? 0
+                                //     : indexOfRecentlySongPlayed;
+                                //
+                                // songNotifier.playPause();
+                                // songNotifier.updateSong(
+                                //   recentlySongPlayed[indexOfRecentlySongPlayed],
+                                // );
                               },
                               icon: Image.asset(
                                 'assets/images/next-song.png',
@@ -256,9 +287,24 @@ class MusicPlayer extends ConsumerWidget {
                           ),
                           Padding(
                             padding: const EdgeInsets.all(10),
-                            child: Image.asset(
-                              'assets/images/repeat.png',
-                              color: Palette.whiteColor,
+                            child: IconButton(
+                              onPressed: () {
+                                ref
+                                    .read(currentSongNotifierProvider.notifier)
+                                    .toggleRepeat();
+                              },
+                              icon: Image.asset(
+                                'assets/images/repeat.png',
+                                color:
+                                    ref
+                                            .watch(
+                                              currentSongNotifierProvider
+                                                  .notifier,
+                                            )
+                                            .isRepeated
+                                        ? Palette.whiteColor
+                                        : Colors.white54,
+                              ),
                             ),
                           ),
                         ],

@@ -10,11 +10,23 @@ part 'current_song_notifier.g.dart';
 class CurrentSongNotifier extends _$CurrentSongNotifier {
   AudioPlayer? audioPlayer;
   bool isPlaying = false;
+  bool isRepeated = false;
   late HomeLocalRepository _homeLocalRepository;
 
   Song? build() {
     _homeLocalRepository = HomeLocalRepository();
     return null;
+  }
+
+  void toggleRepeat() {
+    isRepeated = !isRepeated;
+    // Force notifier to rebuild UI by creating a new copy of the state
+    if (state != null) {
+      state = state!.copyWith(hex_code: state!.hex_code);
+    } else {
+      // Just to be safe, handle the case where state is null
+      ref.notifyListeners();
+    }
   }
 
   void updateSong(Song song) async {
@@ -32,15 +44,17 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
     );
     await audioPlayer!.setAudioSource(audioSource);
 
-    audioPlayer!.playerStateStream.listen((state) {
-      if (state.processingState == ProcessingState.completed) {
-        audioPlayer!.seek(Duration.zero);
-        audioPlayer!.pause();
-        isPlaying = false;
+    // audioPlayer!.playerStateStream.listen((state) {
+    //   if (state.processingState == ProcessingState.completed) {
+    //     audioPlayer!.seek(Duration.zero);
+    //     audioPlayer!.pause();
+    //     isPlaying = false;
+    //
+    //     this.state = this.state?.copyWith(hex_code: this.state?.hex_code);
+    //   }
+    // });
 
-        this.state = this.state?.copyWith(hex_code: this.state?.hex_code);
-      }
-    });
+    _setupCompletionListener();
 
     _homeLocalRepository.uploadLocalSong(song);
 
@@ -65,5 +79,25 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
         milliseconds: (value * audioPlayer!.duration!.inMilliseconds).toInt(),
       ),
     );
+  }
+
+  void _setupCompletionListener() {
+    audioPlayer!.playerStateStream.listen((playerState) {
+      if (playerState.processingState == ProcessingState.completed) {
+        if (isRepeated) {
+          // If repeat is enabled, seek back to the beginning and play again
+          audioPlayer!.seek(Duration.zero);
+          audioPlayer!.play();
+          isPlaying = true;
+        } else {
+          // Handle normal completion
+          audioPlayer!.seek(Duration.zero);
+          audioPlayer!.pause();
+          isPlaying = false;
+        }
+        // Notify UI about state change
+        state = state?.copyWith(hex_code: state?.hex_code);
+      }
+    });
   }
 }

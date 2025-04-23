@@ -15,12 +15,25 @@ class MusicSlab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var currentSong = ref.watch(currentSongNotifierProvider);
     final songNotifier = ref.read(currentSongNotifierProvider.notifier);
-    var userFavorites = ref.watch(
-      currentUserNotifierProvider.select((data) => data!.favorites),
-    );
+    // var userFavorites = ref.watch(
+    //   currentUserNotifierProvider.select((data) {
+    //     print(data); // This will print the data object
+    //     return data!.favorites; // You should return the favorite list (or whatever data you're selecting)
+    //   }),
+    // );
 
-    if (currentSong == null) {
+    final userData = ref.watch(currentUserNotifierProvider);
+
+    if (currentSong == null || userData == null) {
       return const SizedBox();
+    }
+
+    bool isFavorite = false;
+    for (var fav in userData.favorites) {
+      if (fav.song_id == currentSong.id) {
+        isFavorite = true;
+        break;
+      }
     }
 
     return GestureDetector(
@@ -108,11 +121,7 @@ class MusicSlab extends ConsumerWidget {
                             .read(homeViewModelProvider.notifier)
                             .favSongs(currentSong.id);
                       },
-                      icon:
-                          userFavorites
-                                  .where((fav) => fav.song_id == currentSong.id)
-                                  .toList()
-                                  .isNotEmpty
+                      icon: isFavorite
                               ? Icon(CupertinoIcons.heart_fill)
                               : Icon(CupertinoIcons.heart),
                     ),

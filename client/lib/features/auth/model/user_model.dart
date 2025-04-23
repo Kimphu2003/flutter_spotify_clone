@@ -23,7 +23,7 @@ class User {
       email: email ?? this.email,
       id: id ?? this.id,
       token: token ?? this.token,
-      favorites: favorites ?? [],
+      favorites: favorites ?? this.favorites,
     );
   }
 
@@ -33,7 +33,7 @@ class User {
       "email": email,
       "id": id,
       "token": token,
-      "favorites": favorites.map((x) => x.toMap()).toList(),
+      "favorite": favorites.map((x) => x.toMap()).toList(),
     };
   }
 
@@ -44,8 +44,11 @@ class User {
       id: map['id'] ?? '',
       token: map['token'] ?? '',
       favorites: List<FavSongModel>.from(
-        (map['favorites'] ?? []).map(
-          (x) => FavSongModel.fromMap(x as Map<String, dynamic>),
+        (map['favorite'] ?? []).map(
+          (x) {
+            print("favorite ${x}");
+            return FavSongModel.fromMap(x as Map<String, dynamic>);
+          },
         ),
       ),
     );
@@ -57,7 +60,7 @@ class User {
       User.fromMap(jsonDecode(source) as Map<String, dynamic>);
 
   @override
-  String toString() => 'User(name: $name, email: $email, id: $id)';
+  String toString() => 'User(name: $name, email: $email, id: $id, token: $token, favorites: $favorites)';
 
   @override
   bool operator ==(covariant User other) {

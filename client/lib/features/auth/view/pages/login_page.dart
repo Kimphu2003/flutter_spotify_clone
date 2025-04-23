@@ -3,13 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spotify_clone/core/theme/app_pallete.dart';
 import 'package:flutter_spotify_clone/core/utils.dart';
 import 'package:flutter_spotify_clone/core/widgets/loader.dart';
-import 'package:flutter_spotify_clone/features/auth/repositories/auth_remote_repository.dart';
 import 'package:flutter_spotify_clone/features/auth/view/pages/signup_page.dart';
 import 'package:flutter_spotify_clone/features/auth/view/widgets/auth/auth_custom_button.dart';
 import 'package:flutter_spotify_clone/core/widgets/custom_field.dart';
 import 'package:flutter_spotify_clone/features/auth/viewmodel/auth_viewmodel.dart';
 import 'package:flutter_spotify_clone/features/home/view/pages/home_page.dart';
-import 'package:fpdart/fpdart.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
   const LoginPage({super.key});
