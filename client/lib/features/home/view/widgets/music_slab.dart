@@ -2,9 +2,11 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spotify_clone/core/providers/current_song_notifier.dart';
+import 'package:flutter_spotify_clone/core/providers/current_user_notifier.dart';
 import 'package:flutter_spotify_clone/core/theme/app_pallete.dart';
 import 'package:flutter_spotify_clone/core/utils.dart';
 import 'package:flutter_spotify_clone/features/home/view/widgets/music_player.dart';
+import 'package:flutter_spotify_clone/features/home/viewmodel/home_viewmodel.dart';
 
 class MusicSlab extends ConsumerWidget {
   const MusicSlab({super.key});
@@ -13,6 +15,9 @@ class MusicSlab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var currentSong = ref.watch(currentSongNotifierProvider);
     final songNotifier = ref.read(currentSongNotifierProvider.notifier);
+    var userFavorites = ref.watch(
+      currentUserNotifierProvider.select((data) => data!.favorites),
+    );
 
     if (currentSong == null) {
       return const SizedBox();
@@ -98,8 +103,18 @@ class MusicSlab extends ConsumerWidget {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () {},
-                      icon: Icon(CupertinoIcons.heart),
+                      onPressed: () async {
+                        await ref
+                            .read(homeViewModelProvider.notifier)
+                            .favSongs(currentSong.id);
+                      },
+                      icon:
+                          userFavorites
+                                  .where((fav) => fav.song_id == currentSong.id)
+                                  .toList()
+                                  .isNotEmpty
+                              ? Icon(CupertinoIcons.heart_fill)
+                              : Icon(CupertinoIcons.heart),
                     ),
                     IconButton(
                       onPressed: () {

@@ -66,8 +66,8 @@ class HomeRepository {
 
       var resBodyMap = jsonDecode(response.body);
 
-      if(response.statusCode != 200) {
-        resBodyMap = resBodyMap as Map<String ,dynamic>;
+      if (response.statusCode != 200) {
+        resBodyMap = resBodyMap as Map<String, dynamic>;
         return Left(AppFailure(resBodyMap['detail']));
       }
 
@@ -75,10 +75,58 @@ class HomeRepository {
 
       List<Song> songs = [];
 
-      for(final map in resBodyMap) {
+      for (final map in resBodyMap) {
         songs.add(Song.fromMap(map));
       }
       return Right(songs);
+    } catch (e) {
+      return Left(AppFailure(e.toString()));
+    }
+  }
+
+  Future<Either<AppFailure, List<Song>>> getFavSongs(String token) async {
+    try {
+      final response = await http.get(
+        Uri.parse('${ServerConstant.serverURL}/song/list/favorite'),
+        headers: {'Content-Type': 'application/json', 'x-auth-token': token},
+      );
+
+      var resBodyMap = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        resBodyMap = resBodyMap as Map<String, dynamic>;
+        return Left(AppFailure(resBodyMap['detail']));
+      }
+
+      resBodyMap = resBodyMap as List;
+
+      List<Song> songs = [];
+
+      for (final map in resBodyMap) {
+        songs.add(Song.fromMap(map['song']));
+      }
+      return Right(songs);
+    } catch (e) {
+      return Left(AppFailure(e.toString()));
+    }
+  }
+
+  Future<Either<AppFailure, bool>> favSongs(String songId, String token) async {
+    try {
+      final response = await http.post(
+        Uri.parse('${ServerConstant.serverURL}/song/favorite'),
+        headers: {'Content-Type': 'application/json', 'x-auth-token': token},
+        body: jsonEncode({"song_id": songId}),
+      );
+
+      var resBodyMap = jsonDecode(response.body);
+
+      if (response.statusCode != 200) {
+        resBodyMap = resBodyMap as Map<String, dynamic>;
+        return Left(AppFailure(resBodyMap['detail']));
+      }
+
+      return Right(resBodyMap['message']);
     } catch (e) {
       return Left(AppFailure(e.toString()));
     }

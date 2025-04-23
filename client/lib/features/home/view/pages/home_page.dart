@@ -1,7 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_spotify_clone/core/providers/current_user_notifier.dart';
 import 'package:flutter_spotify_clone/core/theme/app_pallete.dart';
 import 'package:flutter_spotify_clone/features/home/view/pages/library_page.dart';
 import 'package:flutter_spotify_clone/features/home/view/pages/songs_page.dart';

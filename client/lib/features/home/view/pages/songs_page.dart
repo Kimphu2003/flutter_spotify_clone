@@ -17,9 +17,8 @@ class SongsPage extends ConsumerWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 500),
       decoration:
-          currentSong == null
-              ? null
-              : BoxDecoration(
+          currentSong != null
+              ? BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
@@ -27,9 +26,9 @@ class SongsPage extends ConsumerWidget {
                     hexToColor(currentSong.hex_code),
                     Palette.transparentColor,
                   ],
-                  stops: const [0.0, 0.3],
+                  stops: [0.0, 0.3],
                 ),
-              ),
+              ): null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
