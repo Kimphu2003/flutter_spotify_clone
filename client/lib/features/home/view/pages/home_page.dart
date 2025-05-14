@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spotify_clone/core/theme/app_pallete.dart';
 import 'package:flutter_spotify_clone/features/home/view/pages/library_page.dart';
+import 'package:flutter_spotify_clone/features/home/view/pages/search_page.dart';
 import 'package:flutter_spotify_clone/features/home/view/pages/songs_page.dart';
 import 'package:flutter_spotify_clone/features/home/view/widgets/music_slab.dart';
 
@@ -16,7 +17,7 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   int selectedIndex = 0;
 
-  final pages = const [SongsPage(), LibraryPage()];
+  final pages = const [SongsPage(), LibraryPage(), SearchPage()];
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +58,16 @@ class _HomePageState extends ConsumerState<HomePage> {
                       : Palette.inactiveBottomBarItemColor,
             ),
             label: 'Library',
+          ),
+          BottomNavigationBarItem(
+            icon: Image.asset(
+              'assets/images/search_filled.png',
+              color:
+              selectedIndex == 2
+                  ? Palette.whiteColor
+                  : Palette.inactiveBottomBarItemColor,
+            ),
+            label: 'Search',
           ),
         ],
       ),

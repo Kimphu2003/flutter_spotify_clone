@@ -141,11 +141,12 @@ class MusicPlayer extends ConsumerWidget {
                         ],
                       ),
                       const SizedBox(height: 15),
+                      // In your MusicPlayer widget, update the StreamBuilder part with this code:
+
                       StreamBuilder(
                         stream: songNotifier.audioPlayer!.positionStream,
                         builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
                             return const SizedBox();
                           }
 
@@ -153,10 +154,10 @@ class MusicPlayer extends ConsumerWidget {
                           final duration = songNotifier.audioPlayer!.duration;
                           double sliderValue = 0.0;
 
-                          if (position != null && duration != null) {
-                            sliderValue =
-                                position.inMilliseconds /
-                                duration.inMilliseconds;
+                          if (position != null && duration != null && duration.inMilliseconds > 0) {
+                            // Ensure the value is clamped between 0.0 and 1.0
+                            sliderValue = (position.inMilliseconds / duration.inMilliseconds)
+                                .clamp(0.0, 1.0);
                           }
 
                           return Column(
@@ -210,22 +211,31 @@ class MusicPlayer extends ConsumerWidget {
                         children: [
                           Padding(
                             padding: const EdgeInsets.all(10),
-                            child: Image.asset(
-                              'assets/images/shuffle.png',
-                              color: Palette.whiteColor,
+                            child: IconButton(
+                              onPressed: () {
+                                ref
+                                    .read(currentSongNotifierProvider.notifier)
+                                    .toggleShuffle();
+                              },
+                              icon: Image.asset(
+                                'assets/images/shuffle.png',
+                                color:
+                                    ref
+                                            .watch(
+                                              currentSongNotifierProvider
+                                                  .notifier,
+                                            )
+                                            .isShuffle
+                                        ? Palette.whiteColor
+                                        : Colors.white54,
+                              ),
                             ),
                           ),
                           Padding(
                             padding: const EdgeInsets.all(10),
                             child: IconButton(
                               onPressed: () {
-                                int newIndex = indexOfRecentlySongPlayed - 1;
-                                if (newIndex < 0) {
-                                  newIndex = 0;
-                                }
-                                songNotifier.updateSong(
-                                  recentlySongPlayed[newIndex],
-                                );
+                                songNotifier.playPreviousSong();
                               },
                               //   indexOfRecentlySongPlayed =
                               //       recentlySongPlayed.length - 2;
@@ -260,24 +270,7 @@ class MusicPlayer extends ConsumerWidget {
                             padding: const EdgeInsets.all(10),
                             child: IconButton(
                               onPressed: () {
-                                int newIndex = indexOfRecentlySongPlayed + 1;
-                                if (newIndex >= recentlySongPlayed.length) {
-                                  newIndex = 0;
-                                }
-                                songNotifier.updateSong(
-                                  recentlySongPlayed[newIndex],
-                                );
-                                // indexOfRecentlySongPlayed =
-                                //     recentlySongPlayed.length + 2;
-                                // indexOfRecentlySongPlayed >
-                                //         recentlySongPlayed.length
-                                //     ? 0
-                                //     : indexOfRecentlySongPlayed;
-                                //
-                                // songNotifier.playPause();
-                                // songNotifier.updateSong(
-                                //   recentlySongPlayed[indexOfRecentlySongPlayed],
-                                // );
+                                songNotifier.playNextSong();
                               },
                               icon: Image.asset(
                                 'assets/images/next-song.png',

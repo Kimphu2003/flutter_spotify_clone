@@ -15,12 +15,6 @@ class MusicSlab extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     var currentSong = ref.watch(currentSongNotifierProvider);
     final songNotifier = ref.read(currentSongNotifierProvider.notifier);
-    // var userFavorites = ref.watch(
-    //   currentUserNotifierProvider.select((data) {
-    //     print(data); // This will print the data object
-    //     return data!.favorites; // You should return the favorite list (or whatever data you're selecting)
-    //   }),
-    // );
 
     final userData = ref.watch(currentUserNotifierProvider);
 

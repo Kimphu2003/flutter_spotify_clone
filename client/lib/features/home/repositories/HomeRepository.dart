@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spotify_clone/core/constants/server_constant.dart';
@@ -129,6 +131,81 @@ class HomeRepository {
       return Right(resBodyMap['message']);
     } catch (e) {
       return Left(AppFailure(e.toString()));
+    }
+  }
+
+  Future<Either<AppFailure, List<Song>>> searchSongs(String query, String token) async {
+    try {
+      // Encode the query parameter properly for URL
+      final encodedQuery = Uri.encodeQueryComponent(query);
+
+      final url = '${ServerConstant.serverURL}/song/search?query=$encodedQuery';
+      print('Making request to: $url'); // Debug log
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json', 'x-auth-token': token},
+      );
+
+      // Debug logging to see what we're getting back
+      print('Response status code: ${response.statusCode}');
+      print('Response headers: ${response.headers}');
+
+      // Check for empty response
+      if (response.body.isEmpty) {
+        return Left(AppFailure('Empty response from server'));
+      }
+
+      // Print first few characters of response for debugging
+      print('Response preview: ${response.body.substring(0, min(100, response.body.length))}');
+
+      // Try to decode the JSON response safely
+      dynamic resBodyMap;
+      try {
+        resBodyMap = jsonDecode(response.body);
+      } catch (e) {
+        // If we can't decode the JSON, return the specific error
+        return Left(AppFailure('Invalid response format: ${e.toString()}. Response: ${response.body.substring(0, min(100, response.body.length))}...'));
+      }
+
+      // Handle error responses
+      if (response.statusCode != 200) {
+        // Check response type more safely
+        if (resBodyMap is Map<String, dynamic> && resBodyMap.containsKey('detail')) {
+          return Left(AppFailure(resBodyMap['detail']));
+        } else {
+          return Left(AppFailure('Error ${response.statusCode}: Could not process server response'));
+        }
+      }
+
+      // Check if response is a List
+      if (resBodyMap is! List) {
+        return Left(AppFailure('Expected list of songs but got ${resBodyMap.runtimeType}'));
+      }
+
+      // Convert items with safer approach
+      List<Song> songs = [];
+      for (final item in resBodyMap) {
+        try {
+          if (item is Map<String, dynamic>) {
+            songs.add(Song.fromMap(item));
+          } else {
+            print('Skipping invalid song item: $item');
+          }
+        } catch (e) {
+          print('Error parsing song: $e');
+          // Continue processing other songs even if one fails
+        }
+      }
+
+      return Right(songs);
+    } on SocketException {
+      return Left(AppFailure('Network error: Could not connect to server'));
+    } on TimeoutException {
+      return Left(AppFailure('Request timed out'));
+    } catch (e) {
+      print('Search error: $e');
+      return Left(AppFailure('Search failed: ${e.toString()}'));
     }
   }
 }

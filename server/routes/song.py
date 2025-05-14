@@ -1,3 +1,4 @@
+from typing import List
 import uuid
 from fastapi import APIRouter, Depends, File, Form, UploadFile
 from sqlalchemy.orm import Session
@@ -11,6 +12,7 @@ import cloudinary.uploader
 from models.favorite import Favorite
 from models.song import Song
 from pydantic_schemas.favorite_song import FavoriteSong
+from pydantic_schemas.song import SongResponse
 
 # Configuration       
 cloudinary.config( 
@@ -88,3 +90,16 @@ def favorite_songs_list(db: Session = Depends(get_db), auth_details = Depends(au
         joinedload(Favorite.song)
     ).all()
     return favorite_songs
+
+
+@router.get('/search', response_model=List[SongResponse])
+def search(query: str, db: Session = Depends(get_db)):
+    # Use wildcards for partial matching
+    search_pattern = f"%{query}%"
+    
+    songs = db.query(Song).filter(
+        Song.song_name.ilike(search_pattern) | Song.artist.ilike(search_pattern)
+    ).all()
+    
+    # FastAPI automatically handles the conversion
+    return songs

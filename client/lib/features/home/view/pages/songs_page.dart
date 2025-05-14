@@ -28,7 +28,8 @@ class SongsPage extends ConsumerWidget {
                   ],
                   stops: [0.0, 0.3],
                 ),
-              ): null,
+              )
+              : null,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -174,6 +175,14 @@ class SongsPage extends ConsumerWidget {
                 },
                 loading: () => const Loader(),
               ),
+
+          const Padding(
+            padding: EdgeInsets.all(8),
+            child: Text(
+              'Your Playlist',
+              style: TextStyle(fontWeight: FontWeight.w700, fontSize: 23),
+            ),
+          ),
         ],
       ),
     );
