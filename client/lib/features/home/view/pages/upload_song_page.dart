@@ -8,7 +8,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spotify_clone/core/theme/app_pallete.dart';
 import 'package:flutter_spotify_clone/core/utils.dart';
 import 'package:flutter_spotify_clone/core/widgets/custom_field.dart';
-import 'package:flutter_spotify_clone/features/home/repositories/HomeRepository.dart';
 import 'package:flutter_spotify_clone/features/home/view/widgets/audio_wave.dart';
 import 'package:flutter_spotify_clone/features/home/viewmodel/home_viewmodel.dart';
 

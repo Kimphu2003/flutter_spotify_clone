@@ -17,6 +17,7 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
   bool _hasSetupListener = false;
   late HomeLocalRepository _homeLocalRepository;
 
+  @override
   Song? build() {
     _homeLocalRepository = HomeLocalRepository();
     ref.onDispose(() {
@@ -189,7 +190,7 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
       if (playerState.processingState == ProcessingState.completed) {
         try {
           if (isRepeated) {
-            print("Repeat mode - playing again.");
+            print("Repeat mode on - playing again.");
             // Make sure that not trigger the slider when seeking to beginning
             audioPlayer!.pause();
             audioPlayer!.seek(Duration.zero).then((_) {
@@ -198,14 +199,14 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
               state = state?.copyWith(hex_code: state?.hex_code);
             });
           } else if (isShuffle) {
-            print("Shuffle mode - next random song.");
+            print("Shuffle mode on - next random song.");
             // Reset position before playing next
             audioPlayer!.pause();
             audioPlayer!.seek(Duration.zero).then((_) {
-              playNextSong(shuffle: true);
+              playNextSong(shuffle: isShuffle);
             });
           } else {
-            print("Normal mode - play next song.");
+            print("Normal mode on - play next song.");
             // First pause, then stop to avoid slider update issues
             audioPlayer!.pause();
             audioPlayer!.stop();

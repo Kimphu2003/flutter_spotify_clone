@@ -13,4 +13,4 @@ class User(Base):
     password = Column(LargeBinary)
 
     favorite = relationship('Favorite', back_populates='user')
-    playlists = relationship('Playlist', back_populates='user')
+    playlists = relationship('Playlist', back_populates='user', cascade="all, delete-orphan")

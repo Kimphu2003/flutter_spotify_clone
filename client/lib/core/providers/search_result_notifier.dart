@@ -3,7 +3,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/home/models/song_model.dart';
-import '../../features/home/repositories/HomeRepository.dart';
+import '../../features/home/repositories/home_repository.dart';
 import 'current_user_notifier.dart';
 
 part 'search_result_notifier.g.dart';

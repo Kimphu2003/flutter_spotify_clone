@@ -237,15 +237,6 @@ class MusicPlayer extends ConsumerWidget {
                               onPressed: () {
                                 songNotifier.playPreviousSong();
                               },
-                              //   indexOfRecentlySongPlayed =
-                              //       recentlySongPlayed.length - 2;
-                              //   indexOfRecentlySongPlayed > 0
-                              //       ? indexOfRecentlySongPlayed
-                              //       : 0;
-                              //   songNotifier.playPause();
-                              //   songNotifier.updateSong(
-                              //     recentlySongPlayed[indexOfRecentlySongPlayed],
-                              //   );
                               icon: Image.asset(
                                 'assets/images/previous-song.png',
                                 color: Palette.whiteColor,
@@ -254,7 +245,7 @@ class MusicPlayer extends ConsumerWidget {
                           ),
                           IconButton(
                             onPressed: () {
-                              recentlySongPlayed.add(currentSong!);
+                              // recentlySongPlayed.add(currentSong!);
                               songNotifier.playPause();
                             },
                             icon:

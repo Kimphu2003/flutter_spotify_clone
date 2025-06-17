@@ -17,9 +17,11 @@ AuthRemoteRepository authRemoteRepository(Ref ref) {
 }
 
 class AuthRemoteRepository {
-  Future<Either<AppFailure, User>> signUp(String name,
-      String email,
-      String password,) async {
+  Future<Either<AppFailure, User>> signUp(
+    String name,
+    String email,
+    String password,
+  ) async {
     try {
       final response = await http.post(
         Uri.parse('${ServerConstant.serverURL}/auth/signup'),
@@ -54,9 +56,9 @@ class AuthRemoteRepository {
         return Left(AppFailure(resBodyMap['detail']));
       }
 
-      return Right(User.fromMap(resBodyMap['user']).copyWith(
-          token: resBodyMap['token']
-      ));
+      return Right(
+        User.fromMap(resBodyMap['user']).copyWith(token: resBodyMap['token']),
+      );
     } catch (e) {
       return Left(AppFailure(e.toString()));
     }
@@ -73,15 +75,12 @@ class AuthRemoteRepository {
       if (response.statusCode != 200) {
         return Left(AppFailure(resBodyMap['detail']));
       }
-      print("res: $resBodyMap");
-      print(Right(User.fromMap(resBodyMap).copyWith(
-        token: token,
-      )
-      ));
-      return Right(User.fromMap(resBodyMap).copyWith(
-          token: token,
-      )
-      );
+      // print("res: $resBodyMap");
+      // print(Right(User.fromMap(resBodyMap).copyWith(
+      //   token: token,
+      // )
+      // ));
+      return Right(User.fromMap(resBodyMap).copyWith(token: token));
     } catch (e) {
       return Left(AppFailure(e.toString()));
     }
