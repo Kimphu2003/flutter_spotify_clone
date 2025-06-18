@@ -279,6 +279,7 @@ class SongsPage extends ConsumerWidget {
                   },
                   loading: () => const Loader(),
                 ),
+            const SizedBox(height: 100,),
           ],
         ),
       ),

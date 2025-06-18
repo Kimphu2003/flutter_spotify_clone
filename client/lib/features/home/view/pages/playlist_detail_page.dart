@@ -53,6 +53,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage> {
 
   Future<void> _removeSongFromPlaylist(String songId) async {
     final playlistsNotifier = ref.read(playlistsNotifierProvider.notifier);
+    print("playlistId: ${widget.playlistId}, songId: $songId");
     final success = await playlistsNotifier.removeSongFromPlaylist(
       widget.playlistId,
       songId,
@@ -359,6 +360,7 @@ class _PlaylistDetailPageState extends ConsumerState<PlaylistDetailPage> {
                               color: const Color(0xFF282828),
                               onSelected: (value) {
                                 if (value == 'remove') {
+                                  print("Removing song: ${song.id}");
                                   _removeSongFromPlaylist(song.id);
                                 }
                               },

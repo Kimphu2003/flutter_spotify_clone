@@ -3,7 +3,6 @@ import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../features/home/models/playlist_model.dart';
-import '../../features/home/models/song_model.dart';
 import '../../features/home/repositories/playlist_repository.dart';
 import 'current_user_notifier.dart';
 
@@ -83,7 +82,7 @@ class PlaylistsNotifier extends _$PlaylistsNotifier {
     state = AsyncValue.data([...currentPlaylists, playlist]);
   }
 
-  Future<bool> addSongToPlaylist(String playlistId, Song song) async {
+  Future<bool> addSongToPlaylist(String playlistId, String songId) async {
     try {
       final user = ref.read(currentUserNotifierProvider);
       if (user == null) {
@@ -94,7 +93,7 @@ class PlaylistsNotifier extends _$PlaylistsNotifier {
       final token = user.token;
       final result = await _playlistRepository.addSongToPlaylist(
         playlistId,
-        song.id,
+        songId,
         token,
       );
 
@@ -264,6 +263,36 @@ class PlaylistsNotifier extends _$PlaylistsNotifier {
       print("Playlist not found: $e");
       return null;
     }
+  }
+
+  int getPlaylistSongCount(String playlistId) {
+    final playlist = getAllPlaylists();
+    if (playlist == null) return 0;
+
+    // Return the number of songs in the playlist
+    return playlist.length;
+  }
+
+  Playlist? getPlaylistBySongId(String songId) {
+    final playlists = state.valueOrNull;
+    if (playlists == null) return null;
+
+    try {
+      return playlists.firstWhere(
+            (playlist) => playlist.songs.any((song) => song.id == songId),
+      );
+    } catch (e) {
+      print("Playlist containing song not found: $e");
+      return null;
+    }
+  }
+
+  List<Playlist>? getAllPlaylists() {
+    final playlists = state.valueOrNull;
+    if (playlists == null) return null;
+
+    // Return all playlists
+    return playlists;
   }
 }
 

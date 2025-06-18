@@ -39,6 +39,7 @@ class MyApp extends ConsumerWidget {
       title: 'Music App',
       theme: AppTheme.darkThemeMode,
       home: currentUser == null ? const LoginPage() :  const HomePage(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }

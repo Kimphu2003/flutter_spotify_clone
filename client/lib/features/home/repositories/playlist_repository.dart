@@ -159,17 +159,20 @@ class PlaylistRepository {
     }
   }
 
-  Future<Either<AppFailure, Map<String, dynamic>>> addSongToPlaylist(
+  Future<Either<AppFailure, String>> addSongToPlaylist(
       String playlistId,
       String songId,
       String token
       ) async {
     try {
-      final url = '${ServerConstant.serverURL}/playlists/$playlistId/songs/$songId';
+      final url = '${ServerConstant.serverURL}/playlists/$playlistId/song';
 
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json', 'x-auth-token': token},
+        body: jsonEncode({
+          'song_id': songId,
+        })
       );
 
       if (response.body.isEmpty) {
@@ -191,7 +194,18 @@ class PlaylistRepository {
         }
       }
 
-      return Right(resBodyMap);
+      if (resBodyMap is Map<String, dynamic>) {
+        final message = resBodyMap['message'];
+        if (message is String) {
+          return Right(message);
+        } else if (message is List) {
+          return Right(message.join(', '));
+        } else {
+          return Right(message.toString());
+        }
+      } else {
+        return Right(resBodyMap.toString());
+      }
     } on SocketException {
       return Left(AppFailure('Network error: Could not connect to server'));
     } on TimeoutException {
@@ -201,13 +215,13 @@ class PlaylistRepository {
     }
   }
 
-  Future<Either<AppFailure, Map<String, dynamic>>> removeSongFromPlaylist(
+  Future<Either<AppFailure, String>> removeSongFromPlaylist(
       String playlistId,
       String songId,
       String token
       ) async {
     try {
-      final url = '${ServerConstant.serverURL}/playlists/$playlistId/songs/$songId';
+      final url = '${ServerConstant.serverURL}/playlists/$playlistId/song/$songId';
 
       final response = await http.delete(
         Uri.parse(url),
@@ -233,7 +247,7 @@ class PlaylistRepository {
         }
       }
 
-      return Right(resBodyMap);
+      return Right(resBodyMap['message']);
     } on SocketException {
       return Left(AppFailure('Network error: Could not connect to server'));
     } on TimeoutException {

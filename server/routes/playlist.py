@@ -94,6 +94,60 @@ def get_user_playlists(
     
     return formatted_playlists
 
+@router.post('/{playlist_id}/song')
+def add_song_to_playlist(
+    playlist_id: str,
+    song_data: AddSongToPlaylist,
+    db: Session = Depends(get_db),
+    auth_details = Depends(auth_middleware)
+):
+    user_id = auth_details['uid']
+    
+    # Check if playlist exists and belongs to user
+    playlist = db.query(Playlist).filter(
+        Playlist.id == playlist_id,
+        Playlist.user_id == user_id
+    ).first()
+    
+    if not playlist:
+        raise HTTPException(status_code=404, detail="Playlist not found")
+    
+    # Check if song is already in playlist
+    existing_song = db.query(PlaylistSong).filter(
+        PlaylistSong.playlist_id == playlist_id,
+        PlaylistSong.song_id == song_data.song_id
+    ).first()
+    
+    if existing_song:
+        raise HTTPException(status_code=400, detail="Song already in playlist")
+    
+    try:
+        # Determine position
+        if song_data.position is None:
+            # Add to end
+            max_position = db.query(PlaylistSong).filter(
+                PlaylistSong.playlist_id == playlist_id
+            ).count()
+            position = max_position + 1
+        else:
+            position = song_data.position
+        
+        new_playlist_song = PlaylistSong(
+            id=str(uuid.uuid4()),
+            playlist_id=playlist_id,
+            song_id=song_data.song_id,
+            position=str(position)
+        )
+        
+        db.add(new_playlist_song)
+        db.commit()
+        
+        return {"message": "Song added to playlist successfully"}
+    
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=str(e))
+
 @router.put('/{playlist_id}', response_model=PlaylistResponse)
 def update_playlist(
     playlist_id: str,
@@ -153,64 +207,10 @@ def delete_playlist(
         db.rollback()
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post('/{playlist_id}/song')
-def add_song_to_playlist(
-    playlist_id: str,
-    song_data: AddSongToPlaylist,
-    db: Session = Depends(get_db),
-    auth_details = Depends(auth_middleware)
-):
-    user_id = auth_details['uid']
-    
-    # Check if playlist exists and belongs to user
-    playlist = db.query(Playlist).filter(
-        Playlist.id == playlist_id,
-        Playlist.user_id == user_id
-    ).first()
-    
-    if not playlist:
-        raise HTTPException(status_code=404, detail="Playlist not found")
-    
-    # Check if song is already in playlist
-    existing_song = db.query(PlaylistSong).filter(
-        PlaylistSong.playlist_id == playlist_id,
-        PlaylistSong.song_id == song_data.song_id
-    ).first()
-    
-    if existing_song:
-        raise HTTPException(status_code=400, detail="Song already in playlist")
-    
-    try:
-        # Determine position
-        if song_data.position is None:
-            # Add to end
-            max_position = db.query(PlaylistSong).filter(
-                PlaylistSong.playlist_id == playlist_id
-            ).count()
-            position = max_position + 1
-        else:
-            position = song_data.position
-        
-        new_playlist_song = PlaylistSong(
-            id=str(uuid.uuid4()),
-            playlist_id=playlist_id,
-            song_id=song_data.song_id,
-            position=str(position)
-        )
-        
-        db.add(new_playlist_song)
-        db.commit()
-        
-        return {"message": "Song added to playlist successfully"}
-    
-    except Exception as e:
-        db.rollback()
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.delete('/{playlist_id}/song')
+@router.delete('/{playlist_id}/song/{song_id}')
 def remove_song_from_playlist(
     playlist_id: str,
-    song_data: RemoveSongFromPlaylist,
+    song_id: str,
     db: Session = Depends(get_db),
     auth_details = Depends(auth_middleware)
 ):
@@ -228,7 +228,7 @@ def remove_song_from_playlist(
     # Find the song in playlist
     playlist_song = db.query(PlaylistSong).filter(
         PlaylistSong.playlist_id == playlist_id,
-        PlaylistSong.song_id == song_data.song_id
+        PlaylistSong.song_id == song_id
     ).first()
     
     if not playlist_song:

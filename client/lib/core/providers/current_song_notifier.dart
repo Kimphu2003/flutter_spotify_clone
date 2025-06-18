@@ -54,6 +54,21 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
     }
   }
 
+  void addToQueue(Song song) {
+    _homeLocalRepository.addToQueue(song);
+    print("Added to queue: ${song.song_name}");
+  }
+
+  void removeFromQueue(String songId) {
+    _homeLocalRepository.removeFromQueue(songId);
+    print("Removed song from queue");
+  }
+
+  void clearQueue() {
+    _homeLocalRepository.clearQueue();
+    print("Queue cleared");
+  }
+
   void updateSong(Song song) async {
     try {
       print("audioPlayer $audioPlayer");
@@ -155,23 +170,44 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
     }
   }
 
-  void playNextSong({bool shuffle = false}) {
+  Song? _getNextSongFromQueue() {
+    return _homeLocalRepository.getNextSongFromQueue();
+  }
+
+  void playNextSong(Song? song, {bool shuffle = false}) {
     try {
+      // First check if there's a song in the queue (unless shuffle is enabled)
+      Song? nextSong = song;
+
+      if (nextSong == null && !shuffle && !isShuffle) {
+        nextSong = _getNextSongFromQueue();
+        if (nextSong != null) {
+          print("Playing next song from queue: ${nextSong.song_name}");
+          updateSong(nextSong);
+          return;
+        }
+      }
+
+      // If no queue song or shuffle is enabled, use existing logic
+      nextSong = nextSong ?? _getRandomSong();
+
       if (shuffle || isShuffle) {
-        final nextSong = _getRandomSong();
         print("next song will be: $nextSong");
         updateSong(nextSong);
       } else {
         final songs = _homeLocalRepository.loadSongs();
-        if (songs.isNotEmpty) {
+        if (songs.isNotEmpty && song == null) {
           int currentIndex = 0;
           if (state != null) {
             currentIndex = songs.indexWhere((song) => song.id == state!.id);
             if (currentIndex < 0) currentIndex = 0; // Handle case if song not found
           }
           int nextIndex = (currentIndex + 1) % songs.length;
-          print("shuffle song: ${songs[nextIndex]}");
+          print("normal next song: ${songs[nextIndex]}");
           updateSong(songs[nextIndex]);
+        } else if (song != null) {
+          print("next song: $song");
+          updateSong(song);
         }
       }
     } catch (e) {
@@ -180,7 +216,6 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
       state = state; // Trigger UI update
     }
   }
-
 
   void _setupCompletionListener() {
     if (_hasSetupListener) return;
@@ -198,20 +233,13 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
               isPlaying = true;
               state = state?.copyWith(hex_code: state?.hex_code);
             });
-          } else if (isShuffle) {
-            print("Shuffle mode on - next random song.");
+          } else {
+            print("Song completed - playing next song.");
             // Reset position before playing next
             audioPlayer!.pause();
             audioPlayer!.seek(Duration.zero).then((_) {
-              playNextSong(shuffle: isShuffle);
+              playNextSong(null, shuffle: isShuffle);
             });
-          } else {
-            print("Normal mode on - play next song.");
-            // First pause, then stop to avoid slider update issues
-            audioPlayer!.pause();
-            audioPlayer!.stop();
-            isPlaying = false;
-            state = state?.copyWith(hex_code: state?.hex_code); // Trigger UI update
           }
         } catch (e) {
           print("Error in completion handler: $e");
