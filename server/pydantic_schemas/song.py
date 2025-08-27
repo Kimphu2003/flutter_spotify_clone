@@ -5,8 +5,6 @@ class SongBase(BaseModel):
     artist: str
     song_url: str
     thumbnail_url: str
-    artist: str
-    song_name: str
     hex_code: str
 
 class SongResponse(SongBase):

@@ -48,6 +48,3 @@ class PlaylistResponse(BaseModel):
 
     class Config:
         from_attributes = True
-
-# class PlaylistWithSongs(PlaylistResponse):
-#     songs: List[dict] = []  # Will contain song details with position

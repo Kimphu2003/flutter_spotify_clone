@@ -2,12 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_spotify_clone/core/providers/current_song_notifier.dart';
-import 'package:flutter_spotify_clone/core/providers/current_user_notifier.dart';
 import 'package:flutter_spotify_clone/core/providers/search_result_notifier.dart';
 import 'package:flutter_spotify_clone/core/theme/app_pallete.dart';
 import 'package:flutter_spotify_clone/features/home/models/song_model.dart';
-import 'package:flutter_spotify_clone/features/home/viewmodel/home_viewmodel.dart';
+
+import '../widgets/song_list_tile.dart';
 
 class SearchPage extends ConsumerStatefulWidget {
   const SearchPage({super.key});
@@ -185,90 +184,3 @@ class _SearchPageState extends ConsumerState<SearchPage> {
   }
 }
 
-class SongListTile extends ConsumerWidget {
-  final Song song;
-
-  const SongListTile({super.key, required this.song});
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return InkWell(
-      onTap: () {
-        // Play the song when tapped
-        ref.read(currentSongNotifierProvider.notifier).updateSong(song);
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8),
-        child: Row(
-          children: [
-            // Song thumbnail
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: Image.network(
-                song.thumbnail_url,
-                width: 60,
-                height: 60,
-                fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) {
-                  return Container(
-                    width: 60,
-                    height: 60,
-                    color: Color(int.parse('0xFF${song.hex_code.replaceAll('#', '')}')),
-                    child: const Icon(Icons.music_note, color: Colors.white),
-                  );
-                },
-              ),
-            ),
-            const SizedBox(width: 16),
-            // Song details
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    song.song_name,
-                    style: const TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    song.artist,
-                    style: TextStyle(
-                      color: Palette.subtitleText,
-                      fontSize: 14,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            // Favorite button
-            IconButton(
-              icon: Consumer(
-                builder: (context, ref, child) {
-                  final currentUser = ref.watch(currentUserNotifierProvider);
-                  final isFavorite = currentUser?.favorites.any(
-                          (fav) => fav.song_id == song.id
-                  ) ?? false;
-
-                  return Icon(
-                    isFavorite ? Icons.favorite : Icons.favorite_border,
-                    color: isFavorite ? Colors.white : null,
-                  );
-                },
-              ),
-              onPressed: () {
-                ref.read(homeViewModelProvider.notifier).favSongs(song.id);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

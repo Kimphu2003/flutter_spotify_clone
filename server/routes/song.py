@@ -18,7 +18,7 @@ from pydantic_schemas.song import SongResponse
 cloudinary.config( 
     cloud_name = "dai3kxqrv", 
     api_key = "783255288532875", 
-    api_secret = "tzfO3tcwgRQJXiKZT8ztW0AEO2k", # Click 'View API Keys' above to copy your API secret
+    api_secret = "tzfO3tcwgRQJXiKZT8ztW0AEO2k",
     secure=True
 )
 
@@ -34,9 +34,7 @@ def upload_song(song: UploadFile = File(...),
                 ):
     song_id = str(uuid.uuid4())
     song_res = cloudinary.uploader.upload(song.file, resource_type = 'auto', folder = f'songs/{song_id}')
-    print(song_res['url'])
     thumbnail_res = cloudinary.uploader.upload(thumbnail.file, resource_type = 'image', folder = f'songs/{song_id}')
-    print(thumbnail_res['url'])
 
     new_song = Song(
         id=song_id,
@@ -94,12 +92,10 @@ def favorite_songs_list(db: Session = Depends(get_db), auth_details = Depends(au
 
 @router.get('/search', response_model=List[SongResponse])
 def search(query: str, db: Session = Depends(get_db)):
-    # Use wildcards for partial matching
     search_pattern = f"%{query}%"
     
     songs = db.query(Song).filter(
         Song.song_name.ilike(search_pattern) | Song.artist.ilike(search_pattern)
     ).all()
     
-    # FastAPI automatically handles the conversion
     return songs

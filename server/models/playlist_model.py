@@ -14,7 +14,6 @@ class Playlist(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
-    # Relationships
     user = relationship('User', back_populates='playlists')
     playlist_songs = relationship('PlaylistSong', back_populates='playlist', cascade="all, delete-orphan")
 
@@ -27,6 +26,5 @@ class PlaylistSong(Base):
     position = Column(TEXT, nullable=False)  # For ordering songs in playlist
     added_at = Column(DateTime, default=datetime.utcnow)
 
-    # Relationships
     playlist = relationship('Playlist', back_populates='playlist_songs')
     song = relationship('Song')

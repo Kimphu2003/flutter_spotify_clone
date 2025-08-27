@@ -50,6 +50,7 @@ class AuthRemoteRepository {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': email, 'password': password}),
       );
+
       final resBodyMap = jsonDecode(response.body) as Map<String, dynamic>;
 
       if (response.statusCode != 200) {
@@ -75,11 +76,7 @@ class AuthRemoteRepository {
       if (response.statusCode != 200) {
         return Left(AppFailure(resBodyMap['detail']));
       }
-      // print("res: $resBodyMap");
-      // print(Right(User.fromMap(resBodyMap).copyWith(
-      //   token: token,
-      // )
-      // ));
+
       return Right(User.fromMap(resBodyMap).copyWith(token: token));
     } catch (e) {
       return Left(AppFailure(e.toString()));

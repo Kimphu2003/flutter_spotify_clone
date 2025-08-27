@@ -46,7 +46,6 @@ class User {
       favorites: List<FavSongModel>.from(
         (map['favorite'] ?? []).map(
           (x) {
-            print("favorite ${x}");
             return FavSongModel.fromMap(x as Map<String, dynamic>);
           },
         ),

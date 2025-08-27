@@ -33,6 +33,12 @@ class CustomField extends StatelessWidget {
         if (value!.trim().isEmpty) {
           return "$hintText is missing!";
         }
+        if(hintText == "Email" && !RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value)) {
+          return "Please enter a valid email address!";
+        }
+        if(hintText == "Password" && value.length < 6) {
+          return "Password must be at least 6 characters long!";
+        }
         return null;
       },
     );

@@ -1,4 +1,6 @@
 
+import 'dart:async';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -35,4 +37,6 @@ class SearchResultNotifier extends _$SearchResultNotifier {
   void clearResults() {
     state = const AsyncValue.data([]);
   }
+
+
 }

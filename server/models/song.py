@@ -13,5 +13,4 @@ class Song(Base):
     song_name = Column(VARCHAR(100))
     hex_code = Column(VARCHAR(6))
 
-    # playlists = relationship('Playlist', back_populates='song')
     
