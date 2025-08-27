@@ -5,6 +5,7 @@ import 'package:flutter_spotify_clone/core/providers/playlist_notifier.dart';
 import 'package:flutter_spotify_clone/core/theme/app_pallete.dart';
 import 'package:flutter_spotify_clone/core/utils.dart';
 import 'package:flutter_spotify_clone/core/widgets/loader.dart';
+import 'package:flutter_spotify_clone/features/home/view/pages/create_playlists_page.dart';
 import 'package:flutter_spotify_clone/features/home/view/pages/playlist_detail_page.dart';
 import 'package:flutter_spotify_clone/features/home/viewmodel/home_viewmodel.dart';
 
@@ -17,7 +18,6 @@ class SongsPage extends ConsumerWidget {
         ref.watch(homeViewModelProvider.notifier).getRecentlySongs();
     final currentSong = ref.watch(currentSongNotifierProvider);
     return SingleChildScrollView(
-
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 500),
         decoration:
@@ -195,8 +195,62 @@ class SongsPage extends ConsumerWidget {
                       height: 260,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
-                        itemCount: playlists.length,
+                        itemCount: playlists.length + 1,
                         itemBuilder: (context, index) {
+                          if (index == playlists.length) {
+                            return Padding(
+                              padding: EdgeInsets.only(left: 16),
+                              child: Column(
+                                children: [
+                                  GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) =>
+                                                  const CreatePlaylistsPage(),
+                                        ),
+                                      );
+                                    },
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          width: 180,
+                                          height: 180,
+                                          decoration: BoxDecoration(
+                                            color: Palette.borderColor,
+                                            borderRadius: BorderRadius.circular(
+                                              7,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.add,
+                                            size: 60,
+                                            color: Palette.whiteColor,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 5),
+                                  SizedBox(
+                                    width: 180,
+                                    child: Text(
+                                      'Add New Playlist',
+                                      style: TextStyle(
+                                        color: Palette.whiteColor,
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w700,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      maxLines: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }
+
                           final playlist = playlists[index];
                           return GestureDetector(
                             onTap: () {
@@ -204,8 +258,9 @@ class SongsPage extends ConsumerWidget {
                                 context,
                                 MaterialPageRoute(
                                   builder:
-                                      (context) =>
-                                          PlaylistDetailPage(playlistId: playlist.id,),
+                                      (context) => PlaylistDetailPage(
+                                        playlistId: playlist.id,
+                                      ),
                                 ),
                               );
                             },
@@ -214,29 +269,63 @@ class SongsPage extends ConsumerWidget {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Container(
-                                    width: 180,
-                                    height: 180,
-                                    decoration: BoxDecoration(
-                                      image: DecorationImage(
-                                        image: AssetImage(
-                                          'assets/images/playlist_thumbnail.png',
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        width: 180,
+                                        height: 180,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: AssetImage(
+                                              'assets/images/playlist_thumbnail.png',
+                                            ),
+                                            fit: BoxFit.cover,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            7,
+                                          ),
                                         ),
-                                        fit: BoxFit.cover,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            color: Palette.borderColor,
+                                            borderRadius: BorderRadius.circular(
+                                              7,
+                                            ),
+                                          ),
+                                          child: Icon(
+                                            Icons.queue_music,
+                                            size: 60,
+                                            color: Palette.whiteColor,
+                                          ),
+                                        ),
                                       ),
-                                      borderRadius: BorderRadius.circular(7),
-                                    ),
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: Palette.borderColor,
-                                        borderRadius: BorderRadius.circular(7),
+                                      Positioned(
+                                        top: 0,
+                                        right: 0,
+                                        child: Container(
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            color: Colors.white54,
+                                          ),
+                                          child: InkWell(
+                                            onTap: () {
+                                              ref
+                                                  .read(
+                                                    playlistsNotifierProvider
+                                                        .notifier,
+                                                  )
+                                                  .deletePlaylist(
+                                                    playlists[index].id,
+                                                  );
+                                            },
+                                            child: Icon(
+                                              Icons.close,
+                                              color: Colors.white,
+                                            ),
+                                          ),
+                                        ),
                                       ),
-                                      child: Icon(
-                                        Icons.queue_music,
-                                        size: 60,
-                                        color: Palette.whiteColor,
-                                      ),
-                                    ),
+                                    ],
                                   ),
                                   const SizedBox(height: 5),
                                   SizedBox(
@@ -279,7 +368,7 @@ class SongsPage extends ConsumerWidget {
                   },
                   loading: () => const Loader(),
                 ),
-            const SizedBox(height: 100,),
+            const SizedBox(height: 100),
           ],
         ),
       ),

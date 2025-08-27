@@ -5,6 +5,7 @@ import 'package:flutter_spotify_clone/core/providers/playlist_notifier.dart';
 import 'package:flutter_spotify_clone/core/theme/app_pallete.dart';
 import 'package:flutter_spotify_clone/core/utils.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:hive/hive.dart';
 import '../../../../core/providers/current_song_notifier.dart';
 import '../../../../core/providers/current_user_notifier.dart';
 import '../../models/song_model.dart';
@@ -354,6 +355,13 @@ class MusicPlayer extends ConsumerWidget {
                     ref
                         .read(playlistsNotifierProvider.notifier)
                         .getAllPlaylists();
+
+                debugPrint('Playlists: ${playlists?.length}');
+
+                // if (playlists!.isEmpty) {
+                //   ref.read(playlistsNotifierProvider.notifier).addSongToPlaylist(playlistId, songId)
+                // }
+
                 showModalBottomSheet(
                   context: context,
                   shape: const RoundedRectangleBorder(
@@ -367,9 +375,15 @@ class MusicPlayer extends ConsumerWidget {
                       child: ListView.builder(
                         itemCount: playlists?.length ?? 0,
                         itemBuilder: (context, index) {
-                          if (playlists == null || playlists.isEmpty) {
-                            return const ListTile(
-                              title: Text('No Playlists Available'),
+                          if (playlists!.isEmpty) {
+                            return ListTile(
+                              title: Text(
+                                'You have to create a playlist first!',
+                                style: TextStyle(
+                                  fontSize: 22,
+                                  color: Colors.white,
+                                ),
+                              ),
                             );
                           }
                           final playlist = playlists[index];
@@ -379,6 +393,7 @@ class MusicPlayer extends ConsumerWidget {
                               ref
                                   .read(playlistsNotifierProvider.notifier)
                                   .addSongToPlaylist(playlist.id, song.id);
+                              Fluttertoast.showToast(msg: 'Added to ${playlist.name} successfully');
                               Navigator.pop(context);
                             },
                           );
