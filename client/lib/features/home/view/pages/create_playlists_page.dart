@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_spotify_clone/core/providers/playlist_notifier.dart';
-import 'package:hive/hive.dart';
 
 class CreatePlaylistsPage extends ConsumerStatefulWidget {
   const CreatePlaylistsPage({super.key});

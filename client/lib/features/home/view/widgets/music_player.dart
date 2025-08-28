@@ -11,11 +11,43 @@ import '../../../../core/providers/current_user_notifier.dart';
 import '../../models/song_model.dart';
 import '../../viewmodel/home_viewmodel.dart';
 
-class MusicPlayer extends ConsumerWidget {
+class MusicPlayer extends ConsumerStatefulWidget {
   const MusicPlayer({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MusicPlayer> createState() => _MusicPlayerState();
+}
+
+class _MusicPlayerState extends ConsumerState<MusicPlayer>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _animationController;
+  late Animation<double> _progressAnimation;
+  int selectedHours = 0;
+  int selectedMinutes = 0;
+  int selectedSeconds = 0;
+
+  final int loopCount = 1000;
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 500),
+    );
+    _progressAnimation = Tween<double>(begin: 0, end: 1).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeIn),
+    );
+  }
+
+  @override
+  void dispose() {
+    _animationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final currentSong = ref.watch(currentSongNotifierProvider);
     final songNotifier = ref.watch(currentSongNotifierProvider.notifier);
     var userFavorites = ref.watch(
@@ -252,19 +284,33 @@ class MusicPlayer extends ConsumerWidget {
                               ),
                             ),
                           ),
-                          IconButton(
-                            onPressed: () {
+                          GestureDetector(
+                            onTap: () {
                               songNotifier.playPause();
                             },
-                            icon:
-                                songNotifier.isPlaying
-                                    ? Icon(CupertinoIcons.pause_circle_fill)
-                                    : Icon(
-                                      CupertinoIcons.play_circle_fill,
-                                      color: Palette.whiteColor,
-                                    ),
-                            iconSize: 80,
+                            child: AnimatedIcon(
+                              icon:
+                                  songNotifier.isPlaying
+                                      ? AnimatedIcons.pause_play
+                                      : AnimatedIcons.play_pause,
+                              progress: _progressAnimation,
+                              size: 60,
+                              color: Palette.whiteColor,
+                            ),
                           ),
+                          // IconButton(
+                          //   onPressed: () {
+                          //     songNotifier.playPause();
+                          //   },
+                          //   icon:
+                          //       songNotifier.isPlaying
+                          //           ? Icon(CupertinoIcons.pause_circle_fill)
+                          //           : Icon(
+                          //             CupertinoIcons.play_circle_fill,
+                          //             color: Palette.whiteColor,
+                          //           ),
+                          //   iconSize: 80,
+                          // ),
                           Padding(
                             padding: const EdgeInsets.all(8),
                             child: IconButton(
@@ -393,7 +439,13 @@ class MusicPlayer extends ConsumerWidget {
                               ref
                                   .read(playlistsNotifierProvider.notifier)
                                   .addSongToPlaylist(playlist.id, song.id);
-                              Fluttertoast.showToast(msg: 'Added to ${playlist.name} successfully');
+                              Fluttertoast.showToast(
+                                msg: 'Added to ${playlist.name} successfully',
+                                toastLength: Toast.LENGTH_SHORT,
+                                gravity: ToastGravity.CENTER,
+                                backgroundColor: Colors.green,
+                                textColor: Colors.white,
+                              );
                               Navigator.pop(context);
                             },
                           );
@@ -417,6 +469,13 @@ class MusicPlayer extends ConsumerWidget {
                     duration: Duration(seconds: 2),
                   ),
                 );
+              },
+            ),
+            ListTile(
+              leading: const Icon(CupertinoIcons.time_solid),
+              title: const Text('Sleep Timer'),
+              onTap: () {
+                _selectSleepTimer(context);
               },
             ),
             ListTile(
@@ -446,6 +505,116 @@ class MusicPlayer extends ConsumerWidget {
           ],
         );
       },
+    );
+  }
+
+  _selectSleepTimer(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            'Select Sleep Timer',
+            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          content: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildWheelPicker(
+                maxValue: 23,
+                onSelected:
+                    (val) => setState(() {
+                      selectedHours = val;
+                    }),
+              ),
+              _buildWheelPicker(
+                maxValue: 59,
+                onSelected:
+                    (val) => setState(() {
+                      selectedMinutes = val;
+                    }),
+              ),
+              _buildWheelPicker(
+                maxValue: 59,
+                onSelected:
+                    (val) => setState(() {
+                      selectedSeconds = val;
+                    }),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                final totalSeconds =
+                    (selectedHours * 3600) +
+                    (selectedMinutes * 60) +
+                    selectedSeconds;
+                if (totalSeconds > 0) {
+                  ref
+                      .read(currentSongNotifierProvider.notifier)
+                      .setSleepTimer(totalSeconds);
+                  Fluttertoast.showToast(
+                    msg:
+                        'Sleep timer set for ${selectedHours}h ${selectedMinutes}m ${selectedSeconds}s',
+                    toastLength: Toast.LENGTH_SHORT,
+                    gravity: ToastGravity.CENTER,
+                    backgroundColor: Colors.green,
+                    textColor: Colors.white,
+                  );
+                }
+              },
+              child: const Text(
+                'OK',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text(
+                'Cancel',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildWheelPicker({
+    required int maxValue,
+    required Function(int) onSelected,
+  }) {
+    final itemCount = (maxValue + 1) * loopCount;
+    return SizedBox(
+      width: 70,
+      height: 150,
+      child: ListWheelScrollView.useDelegate(
+        itemExtent: 32,
+        diameterRatio: 1.2,
+        physics: FixedExtentScrollPhysics(),
+        onSelectedItemChanged: (index) {
+          final value = index % (maxValue + 1);
+          onSelected(value);
+        },
+        controller: FixedExtentScrollController(initialItem: itemCount ~/ 2),
+        childDelegate: ListWheelChildBuilderDelegate(
+          builder: (context, index) {
+            final value = index % (maxValue + 1);
+            return Center(
+              child: Text(
+                value.toString().padLeft(2, "0"),
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.w500),
+              ),
+            );
+          },
+          childCount: itemCount,
+        ),
+      ),
     );
   }
 }

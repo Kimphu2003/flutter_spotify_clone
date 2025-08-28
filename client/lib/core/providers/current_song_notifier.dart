@@ -217,6 +217,17 @@ class CurrentSongNotifier extends _$CurrentSongNotifier {
     }
   }
 
+  void setSleepTimer(int totalSeconds) {
+    if(totalSeconds <= 0) return;
+    Future.delayed(Duration(seconds: totalSeconds), () {
+      if(audioPlayer != null && isPlaying) {
+        audioPlayer!.pause();
+        isPlaying = false;
+        state = state?.copyWith(hex_code: state?.hex_code);
+      }
+    });
+  }
+
   void _setupCompletionListener() {
     if (_hasSetupListener) return;
     _hasSetupListener = true;
