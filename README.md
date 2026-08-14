@@ -63,19 +63,6 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-Configure your `.env` with PostgreSQL and Cloudinary credentials before running.
-
-## 📸 Screenshots
-
-<!-- Add screenshots or a demo GIF here -->
-| Home | Player | Upload |
-|---|---|---|
-| _screenshot_ | _screenshot_ | _screenshot_ |
-
-## 📄 License
-
-This project was built for educational/portfolio purposes.
-
 ## 👤 Author
 
 **Tran Kim Phu**
